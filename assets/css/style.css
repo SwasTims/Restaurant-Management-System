@@ -1,79 +1,397 @@
+/* =========================================================
+   1. Theme
+   ========================================================= */
 :root {
-    --primary: #1f3a3d;
-    --accent: #e07a1f;
-    --bg: #f5f2ec;
-    --text: #2b2b2b;
-    --success: #2e7d4f;
-    --error: #b3392f;
+    --forest: #1f4d2e;
+    --forest-dark: #173b23;
+    --cream: #faf7f0;
+    --cream-dark: #f1ebdb;
+    --cream-border: #e6dfcc;
+    --amber: #d98a1f;
+    --amber-dark: #bf7714;
+    --butter: #f3e3a8;
+    --butter-light: #fff6d6;
+    --text: #1c2b20;
+    --muted: #5b6b5e;
+    --white: #ffffff;
+    --success-bg: #e3f0e4;
+    --success-text: #1f4d2e;
+    --error-bg: #fbe4df;
+    --error-text: #8a2e1a;
 }
 
+/* =========================================================
+   2. Base
+   ========================================================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--cream);
     color: var(--text);
     line-height: 1.6;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
+a {
+    color: var(--forest);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--amber);
+}
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.container.narrow {
+    max-width: 760px;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--butter);
+    color: var(--forest);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* =========================================================
+   3. Alerts, forms and buttons
+   ========================================================= */
+.alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.alert-error {
+    background: var(--error-bg);
+    color: var(--error-text);
+}
+
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cream-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--white);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--forest);
+    border-color: var(--forest);
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 22px;
+    background: var(--amber);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--amber-dark);
+    color: var(--white);
+}
+
+.btn-block {
+    width: 100%;
+    text-align: center;
+}
+
+/* =========================================================
+   4. Landing page (logged out)
+   ========================================================= */
 .navbar {
-    background: var(--primary);
-    padding: 14px 32px;
+    background: var(--forest);
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.navbar-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .navbar .brand {
-    color: #fff;
-    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+    font-size: 1.1rem;
     font-weight: 600;
-    text-decoration: none;
+}
+
+.navbar .brand:hover {
+    color: var(--butter-light);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
 }
 
 .nav-links a {
-    color: #d9e2e2;
-    text-decoration: none;
-    margin-left: 20px;
+    color: var(--butter);
 }
 
 .nav-links a:hover {
-    color: var(--accent);
+    color: var(--butter-light);
 }
 
-.container {
-    width: 100%;
-    max-width: 1100px;
-    margin: 28px auto;
-    padding: 0 20px;
-    flex: 1;
-}
-
-.alert {
-    padding: 12px 16px;
+.nav-links .nav-cta {
+    background: var(--butter);
+    color: var(--forest);
+    padding: 6px 16px;
     border-radius: 6px;
+    font-weight: 600;
+}
+
+.nav-links .nav-cta:hover {
+    background: var(--butter-light);
+    color: var(--forest);
+}
+
+.hero {
+    background: var(--forest);
+    color: var(--white);
+    text-align: center;
+    padding: 90px 0 100px;
+}
+
+.hero h1 {
+    font-size: 2.6rem;
+    line-height: 1.2;
+    max-width: 700px;
+    margin: 0 auto 16px;
+}
+
+.hero p {
+    color: var(--butter);
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+}
+
+.section {
+    padding: 70px 0;
+}
+
+.section-alt {
+    background: var(--cream-dark);
+}
+
+.section h2 {
+    color: var(--forest);
+    font-size: 1.8rem;
     margin-bottom: 20px;
-    color: #fff;
 }
 
-.alert-success {
-    background: var(--success);
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 10px;
 }
 
-.alert-error {
-    background: var(--error);
+.feature {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 10px;
+    padding: 22px;
+}
+
+.feature h3 {
+    color: var(--forest);
+    margin-bottom: 6px;
+}
+
+.feature p {
+    color: var(--muted);
+}
+
+.contact-list {
+    list-style: none;
+    margin-top: 12px;
+}
+
+.contact-list li {
+    padding: 4px 0;
 }
 
 .footer {
+    background: var(--forest);
+    color: var(--butter);
     text-align: center;
-    padding: 16px;
-    font-size: 0.85rem;
-    color: #777;
+    padding: 18px 0;
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   5. Login page
+   ========================================================= */
+.auth-page {
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 12px;
+    padding: 32px;
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--forest);
+    font-weight: 600;
+    margin-bottom: 22px;
+}
+
+.auth-card h1 {
+    color: var(--forest);
+    font-size: 1.5rem;
+}
+
+.auth-sub {
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+
+.auth-back {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   6. App pages (logged in)
+   ========================================================= */
+.app-topbar {
+    background: var(--forest);
+    color: var(--butter);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+    font-weight: 600;
+}
+
+.app-brand:hover {
+    color: var(--butter-light);
+}
+
+.app-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.role-badge {
+    background: var(--butter);
+    color: var(--forest);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.topbar-logout {
+    color: var(--butter);
+}
+
+.topbar-logout:hover {
+    color: var(--butter-light);
+}
+
+.app-content {
+    padding: 28px 24px;
+}
+
+.page-heading {
+    color: var(--forest);
+    margin-bottom: 12px;
+}
+
+/* =========================================================
+   7. Small screens
+   ========================================================= */
+@media (max-width: 700px) {
+    .nav-links a:not(.nav-cta) {
+        display: none;
+    }
+
+    .hero {
+        padding: 60px 0 70px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
 }
