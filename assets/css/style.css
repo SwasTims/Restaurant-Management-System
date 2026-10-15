@@ -323,33 +323,128 @@ textarea:focus {
 }
 
 /* =========================================================
-   6. App pages (logged in)
+   6. App pages (logged in): sidebar + main area
    ========================================================= */
-.app-topbar {
-    background: var(--forest);
-    color: var(--butter);
+.app-shell {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 24px;
+    min-height: 100vh;
 }
 
-.app-brand {
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--forest);
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: margin-left 0.25s ease;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+    margin-left: -240px;
+}
+
+.sidebar-brand {
+    padding: 22px 20px;
     color: var(--white);
     font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.app-brand:hover {
+.sidebar-nav {
+    flex: 1;
+    padding: 14px 10px;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    color: var(--butter);
+}
+
+.sidebar-nav a:hover {
+    background: rgba(255, 255, 255, 0.08);
     color: var(--butter-light);
 }
 
-.app-topbar-right {
+.sidebar-nav a.active {
+    background: var(--butter);
+    color: var(--forest);
+    font-weight: 600;
+}
+
+.sidebar-logout {
+    padding: 16px 24px;
+    color: var(--butter);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-logout:hover {
+    color: var(--butter-light);
+}
+
+.app-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 60px;
+    background: var(--white);
+    border-bottom: 1px solid var(--cream-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+}
+
+.topbar-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
+}
+
+.menu-toggle {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--cream-border);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.menu-toggle:hover {
+    background: var(--cream);
+}
+
+.menu-toggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--forest);
+}
+
+.topbar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--forest);
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .role-badge {
@@ -362,15 +457,8 @@ textarea:focus {
     border-radius: 999px;
 }
 
-.topbar-logout {
-    color: var(--butter);
-}
-
-.topbar-logout:hover {
-    color: var(--butter-light);
-}
-
 .app-content {
+    flex: 1;
     padding: 28px 24px;
 }
 

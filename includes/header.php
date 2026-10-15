@@ -16,21 +16,30 @@ $flash = get_flash();
 </head>
 <body class="app">
 
-<header class="app-topbar">
-    <a class="app-brand" href="<?= BASE_URL . home_for_role($user['role']) ?>">
-        <span class="brand-mark">R</span>
-        <span>Restaurant Management</span>
-    </a>
-    <div class="app-topbar-right">
-        <span><?= e($user['name']) ?></span>
-        <span class="role-badge"><?= e($user['role']) ?></span>
-        <a class="topbar-logout" href="<?= BASE_URL ?>/logout">Logout</a>
-    </div>
-</header>
+<div class="app-shell">
 
-<main class="app-content">
-    <?php if ($flash): ?>
-        <div class="alert alert-<?= e($flash['type']) ?>">
-            <?= e($flash['message']) ?>
-        </div>
-    <?php endif; ?>
+    <?php require __DIR__ . '/sidebar.php'; ?>
+
+    <div class="app-main">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="topbar-title"><?= e($page_title) ?></div>
+            </div>
+            <div class="topbar-user">
+                <span><?= e($user['name']) ?></span>
+                <span class="role-badge"><?= e($user['role']) ?></span>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <?php if ($flash): ?>
+                <div class="alert alert-<?= e($flash['type']) ?>">
+                    <?= e($flash['message']) ?>
+                </div>
+            <?php endif; ?>
