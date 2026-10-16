@@ -1,11 +1,11 @@
 <?php
 $links = [
     ['Dashboard',      '/admin/dashboard'],
-    ['Staff accounts', '/admin/accounts/'],
-    ['Categories',     '/admin/categories/'],
-    ['Menu items',     '/admin/menu/'],
-    ['Inventory',      '/admin/inventory/'],
-    ['Reports',        '/admin/reports/'],
+    ['Staff accounts', '/admin/accounts'],
+    ['Orders',         '/admin/orders'],
+    ['Menu items',     '/admin/menu'],
+    ['Inventory',      '/admin/inventory'],
+    ['Reports',        '/admin/reports'],
 ];
 
 $current = $_SERVER['REQUEST_URI'];

@@ -92,6 +92,10 @@ a:hover {
     color: var(--error-text);
 }
 
+.error-list {
+    margin-left: 18px;
+}
+
 label {
     display: block;
     margin: 14px 0 6px;
@@ -121,6 +125,25 @@ textarea:focus {
     border-color: var(--forest);
 }
 
+input[type="file"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+label.check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    margin-top: 16px;
+    cursor: pointer;
+}
+
+label.check input {
+    width: auto;
+}
+
 .btn {
     display: inline-block;
     margin-top: 20px;
@@ -142,6 +165,33 @@ textarea:focus {
 .btn-block {
     width: 100%;
     text-align: center;
+}
+
+.btn-light {
+    background: var(--white);
+    color: var(--text);
+    border: 1px solid var(--cream-border);
+}
+
+.btn-light:hover {
+    background: var(--cream);
+    color: var(--text);
+}
+
+.btn-danger {
+    background: #b3402a;
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #8f3220;
+    color: var(--white);
+}
+
+.btn-small {
+    margin-top: 0;
+    padding: 5px 14px;
+    font-size: 0.85rem;
 }
 
 /* =========================================================
@@ -467,6 +517,251 @@ textarea:focus {
     margin-bottom: 12px;
 }
 
+/* Toolbar, filters and result count */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.toolbar .btn {
+    margin-top: 0;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.filters input[type="text"],
+.filters select {
+    width: auto;
+    min-width: 150px;
+}
+
+.filters .btn {
+    margin-top: 0;
+    padding: 9px 18px;
+}
+
+.result-count {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+/* Tables */
+.table-wrap {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--cream-border);
+    vertical-align: middle;
+}
+
+.table th {
+    background: var(--cream-dark);
+    color: var(--forest);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--cream);
+}
+
+.table-empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px 16px;
+}
+
+.table td.actions {
+    white-space: nowrap;
+}
+
+.table td.actions .btn + .btn {
+    margin-left: 6px;
+}
+
+.status-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.status-cell form {
+    margin: 0;
+}
+
+/* Status badges */
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge-active {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.badge-inactive {
+    background: var(--error-bg);
+    color: var(--error-text);
+}
+
+/* Photos in the table */
+.thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+}
+
+.thumb-empty {
+    background: var(--cream-dark);
+    color: var(--forest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Photo preview in the form */
+.preview-box {
+    height: 150px;
+    margin-top: 10px;
+    border: 1px dashed var(--cream-border);
+    border-radius: 8px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-empty {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* Popups */
+.dialog {
+    margin: auto;
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    width: min(460px, 92vw);
+    max-height: 92vh;
+    overflow-y: auto;
+    background: var(--white);
+    color: var(--text);
+}
+
+.dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.dialog-wide {
+    width: min(620px, 92vw);
+}
+
+.dialog-body {
+    padding: 24px;
+}
+
+.dialog-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.dialog-head h2 {
+    color: var(--forest);
+    font-size: 1.15rem;
+}
+
+.dialog-close {
+    border: none;
+    background: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.dialog-close:hover {
+    color: var(--forest);
+}
+
+.dialog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+}
+
+.dialog-grid label {
+    margin-top: 12px;
+}
+
+.dialog-grid .field-full {
+    grid-column: 1 / -1;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.dialog-actions .btn {
+    margin-top: 0;
+}
+
+.confirm-text {
+    margin: 10px 0 4px;
+}
+
 /* =========================================================
    7. Small screens
    ========================================================= */
@@ -481,5 +776,9 @@ textarea:focus {
 
     .hero h1 {
         font-size: 2rem;
+    }
+
+    .dialog-grid {
+        grid-template-columns: 1fr;
     }
 }
