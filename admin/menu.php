@@ -12,6 +12,56 @@ $allowed_images = [
     'image/webp' => 'webp',
 ];
 
+// ---- Image helpers ----
+
+// Checks an uploaded file. Returns [extension or null, error message or null].
+function check_image($file, $allowed, $max_bytes)
+{
+    if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        return [null, null]; // no photo chosen, which is fine
+    }
+    if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+        return [null, 'Image must be 2 MB or smaller.'];
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return [null, 'The image could not be uploaded. Try again.'];
+    }
+    if ($file['size'] > $max_bytes) {
+        return [null, 'Image must be 2 MB or smaller.'];
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file['tmp_name']);
+    if (!isset($allowed[$mime])) {
+        return [null, 'Image must be a JPG, PNG or WebP file.'];
+    }
+    return [$allowed[$mime], null];
+}
+
+// Moves a checked upload into the uploads folder under a random name. Returns the name or null.
+function save_image($file, $ext, $dir)
+{
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    $name = bin2hex(random_bytes(16)) . '.' . $ext;
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
+        return null;
+    }
+    return $name;
+}
+
+// Deletes an image file, but only if the name looks exactly like one we created.
+function delete_image_file($dir, $name)
+{
+    if ($name && preg_match('/^[a-f0-9]{32}\.(jpg|png|webp)$/', $name)) {
+        $path = $dir . '/' . $name;
+        if (is_file($path)) {
+            unlink($path);
+        }
+    }
+}
+
 $categories = $pdo->query('SELECT id, name FROM categories ORDER BY name')->fetchAll();
 $category_ids = array_map('intval', array_column($categories, 'id'));
 
@@ -20,6 +70,10 @@ $cat_form = ['name' => ''];
 
 $item_errors = [];
 $item_form = ['name' => '', 'category_id' => 0, 'price' => '', 'is_available' => '1'];
+
+$edit_errors = [];
+$edit_form = ['id' => 0, 'name' => '', 'category_id' => 0, 'price' => ''];
+$edit_current_image = null;
 
 // Where to go after saving: the same page, keeping any active filters
 $back = '/admin/menu';
@@ -74,26 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'add_item') {
         $item_errors[] = 'Enter a valid price, like 180 or 180.50.';
     }
 
-    // Image (optional): check it, but do not save it yet
-    $image_ext = null;
-    $file = $_FILES['image'] ?? null;
-
-    if ($file && $file['error'] !== UPLOAD_ERR_NO_FILE) {
-        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
-            $item_errors[] = 'Image must be 2 MB or smaller.';
-        } elseif ($file['error'] !== UPLOAD_ERR_OK) {
-            $item_errors[] = 'The image could not be uploaded. Try again.';
-        } elseif ($file['size'] > $max_image_bytes) {
-            $item_errors[] = 'Image must be 2 MB or smaller.';
-        } else {
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $mime = $finfo->file($file['tmp_name']);
-            if (isset($allowed_images[$mime])) {
-                $image_ext = $allowed_images[$mime];
-            } else {
-                $item_errors[] = 'Image must be a JPG, PNG or WebP file.';
-            }
-        }
+    [$image_ext, $image_error] = check_image($_FILES['image'] ?? null, $allowed_images, $max_image_bytes);
+    if ($image_error) {
+        $item_errors[] = $image_error;
     }
 
     if (!$item_errors) {
@@ -107,13 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'add_item') {
     // Everything is valid: now save the image file, then the row
     $image_name = null;
     if (!$item_errors && $image_ext !== null) {
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        $image_name = bin2hex(random_bytes(16)) . '.' . $image_ext;
-        if (!move_uploaded_file($file['tmp_name'], $upload_dir . '/' . $image_name)) {
+        $image_name = save_image($_FILES['image'], $image_ext, $upload_dir);
+        if ($image_name === null) {
             $item_errors[] = 'The image could not be saved. Check the uploads folder.';
-            $image_name = null;
         }
     }
 
@@ -131,6 +164,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'add_item') {
         set_flash('success', 'Menu item added.');
         redirect($back);
     }
+}
+
+// ---- Edit menu item ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'edit_item') {
+    $edit_form['id'] = (int) ($_POST['id'] ?? 0);
+    $edit_form['name'] = trim($_POST['name'] ?? '');
+    $edit_form['category_id'] = (int) ($_POST['category_id'] ?? 0);
+    $edit_form['price'] = trim($_POST['price'] ?? '');
+
+    $stmt = $pdo->prepare('SELECT id, image FROM menu_items WHERE id = ?');
+    $stmt->execute([$edit_form['id']]);
+    $existing = $stmt->fetch();
+
+    if (!$existing) {
+        $edit_errors[] = 'That item no longer exists.';
+    } else {
+        $edit_current_image = $existing['image'];
+    }
+
+    if ($edit_form['name'] === '') {
+        $edit_errors[] = 'Item name is required.';
+    } elseif (mb_strlen($edit_form['name']) > 150) {
+        $edit_errors[] = 'Item name can be at most 150 characters.';
+    }
+    if (!in_array($edit_form['category_id'], $category_ids, true)) {
+        $edit_errors[] = 'Choose a category.';
+    }
+    if (!preg_match('/^\d{1,8}(\.\d{1,2})?$/', $edit_form['price']) || (float) $edit_form['price'] <= 0) {
+        $edit_errors[] = 'Enter a valid price, like 180 or 180.50.';
+    }
+
+    [$new_ext, $new_image_error] = check_image($_FILES['image'] ?? null, $allowed_images, $max_image_bytes);
+    if ($new_image_error) {
+        $edit_errors[] = $new_image_error;
+    }
+
+    if (!$edit_errors) {
+        $check = $pdo->prepare('SELECT id FROM menu_items WHERE category_id = ? AND name = ? AND id != ?');
+        $check->execute([$edit_form['category_id'], $edit_form['name'], $edit_form['id']]);
+        if ($check->fetch()) {
+            $edit_errors[] = 'That item already exists in this category.';
+        }
+    }
+
+    // Save the new photo (if there is one) before touching the row
+    $new_image = null;
+    if (!$edit_errors && $new_ext !== null) {
+        $new_image = save_image($_FILES['image'], $new_ext, $upload_dir);
+        if ($new_image === null) {
+            $edit_errors[] = 'The image could not be saved. Check the uploads folder.';
+        }
+    }
+
+    if (!$edit_errors) {
+        $sql = 'UPDATE menu_items SET name = ?, category_id = ?, price = ?';
+        $params = [
+            $edit_form['name'],
+            $edit_form['category_id'],
+            number_format((float) $edit_form['price'], 2, '.', ''),
+        ];
+
+        if ($new_image !== null) {
+            $sql .= ', image = ?';
+            $params[] = $new_image;
+        }
+
+        $sql .= ' WHERE id = ?';
+        $params[] = $edit_form['id'];
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        // The row now points at the new photo, so the old file can go
+        if ($new_image !== null) {
+            delete_image_file($upload_dir, $existing['image']);
+        }
+
+        set_flash('success', 'Menu item updated.');
+        redirect($back);
+    }
+}
+
+// ---- Delete menu item ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete_item') {
+    $delete_id = (int) ($_POST['id'] ?? 0);
+
+    $stmt = $pdo->prepare('SELECT image FROM menu_items WHERE id = ?');
+    $stmt->execute([$delete_id]);
+    $doomed = $stmt->fetch();
+
+    $stmt = $pdo->prepare('DELETE FROM menu_items WHERE id = ?');
+    $stmt->execute([$delete_id]);
+
+    if ($stmt->rowCount() > 0) {
+        delete_image_file($upload_dir, $doomed['image'] ?? null);
+        set_flash('success', 'Menu item deleted.');
+    } else {
+        set_flash('error', 'That item could not be deleted.');
+    }
+    redirect($back);
 }
 
 // ---- Change availability (out of stock / back in stock) ----
@@ -167,7 +300,7 @@ if ($filter_avail === 'available') {
     $where[] = 'm.is_available = 0';
 }
 
-$sql = 'SELECT m.id, m.name, m.price, m.image, m.is_available, c.name AS category_name
+$sql = 'SELECT m.id, m.category_id, m.name, m.price, m.image, m.is_available, c.name AS category_name
         FROM menu_items m
         JOIN categories c ON c.id = m.category_id';
 if ($where) {
@@ -182,6 +315,8 @@ $items = $stmt->fetchAll();
 $is_filtered = $search !== ''
     || in_array($filter_category, $category_ids, true)
     || in_array($filter_avail, ['available', 'unavailable'], true);
+
+$edit_preview_url = $edit_current_image ? $upload_url . '/' . $edit_current_image : '';
 
 $page_title = 'Menu items';
 require_once __DIR__ . '/../includes/header.php';
@@ -229,12 +364,13 @@ require_once __DIR__ . '/../includes/header.php';
                 <th>Category</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             <?php if (count($items) === 0): ?>
                 <tr>
-                    <td colspan="5" class="table-empty">
+                    <td colspan="6" class="table-empty">
                         <?= $is_filtered ? 'No items match these filters.' : 'No menu items yet.' ?>
                     </td>
                 </tr>
@@ -272,6 +408,21 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?php endif; ?>
                             </form>
                         </div>
+                    </td>
+                    <td class="actions">
+                        <button type="button" class="btn btn-small btn-light" data-edit
+                            data-id="<?= (int) $item['id'] ?>"
+                            data-name="<?= e($item['name']) ?>"
+                            data-category_id="<?= (int) $item['category_id'] ?>"
+                            data-price="<?= e($item['price']) ?>"
+                            data-preview-url="<?= $item['image'] ? e($upload_url . '/' . $item['image']) : '' ?>">
+                            Edit
+                        </button>
+                        <button type="button" class="btn btn-small btn-danger" data-delete
+                            data-id="<?= (int) $item['id'] ?>"
+                            data-name="<?= e($item['name']) ?>">
+                            Delete
+                        </button>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -386,6 +537,96 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </form>
         <?php endif; ?>
+    </div>
+</dialog>
+
+<!-- Edit item popup (one dialog, filled by JavaScript for whichever row was clicked) -->
+<dialog id="editDialog" class="dialog dialog-wide" <?= $edit_errors ? 'data-auto-open' : '' ?>>
+    <div class="dialog-body">
+        <div class="dialog-head">
+            <h2>Edit menu item</h2>
+            <button type="button" class="dialog-close" data-close-dialog aria-label="Close">&times;</button>
+        </div>
+
+        <?php if ($edit_errors): ?>
+            <div class="alert alert-error">
+                <ul class="error-list">
+                    <?php foreach ($edit_errors as $error): ?>
+                        <li><?= e($error) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="edit_item">
+            <input type="hidden" name="id" value="<?= (int) $edit_form['id'] ?>">
+
+            <div class="dialog-grid">
+                <div class="field-full">
+                    <label for="edit_name">Item name</label>
+                    <input type="text" id="edit_name" name="name" maxlength="150" value="<?= e($edit_form['name']) ?>" required>
+                </div>
+
+                <div>
+                    <label for="edit_category">Category</label>
+                    <select id="edit_category" name="category_id">
+                        <option value="0">Choose...</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= (int) $category['id'] ?>" <?= $edit_form['category_id'] === (int) $category['id'] ? 'selected' : '' ?>>
+                                <?= e($category['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit_price">Price (Rs.)</label>
+                    <input type="text" id="edit_price" name="price" inputmode="decimal" value="<?= e($edit_form['price']) ?>" required>
+                </div>
+
+                <div class="field-full">
+                    <label for="edit_image">Replace photo (leave empty to keep the current one)</label>
+                    <input type="file" id="edit_image" name="image"
+                           accept="image/jpeg,image/png,image/webp"
+                           data-preview="editPreview">
+                    <div class="preview-box">
+                        <img id="editPreview" alt="Photo preview"
+                             <?= $edit_preview_url !== '' ? 'src="' . e($edit_preview_url) . '" data-original="' . e($edit_preview_url) . '"' : 'hidden' ?>>
+                        <span class="preview-empty" <?= $edit_preview_url !== '' ? 'hidden' : '' ?>>No photo</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-light" data-close-dialog>Cancel</button>
+                <button type="submit" class="btn">Save changes</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Delete confirmation popup -->
+<dialog id="deleteDialog" class="dialog">
+    <div class="dialog-body">
+        <div class="dialog-head">
+            <h2>Delete item</h2>
+            <button type="button" class="dialog-close" data-close-dialog aria-label="Close">&times;</button>
+        </div>
+
+        <p class="confirm-text">
+            Delete <strong id="deleteName"></strong>? Its photo will be removed too. This cannot be undone.
+        </p>
+
+        <form method="post">
+            <input type="hidden" name="action" value="delete_item">
+            <input type="hidden" name="id" value="">
+
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-light" data-close-dialog>Cancel</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
     </div>
 </dialog>
 

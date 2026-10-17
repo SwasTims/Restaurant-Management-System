@@ -4,6 +4,7 @@ $links = [
     ['Staff accounts', '/admin/accounts'],
     ['Orders',         '/admin/orders'],
     ['Menu items',     '/admin/menu'],
+    ['Tables',         '/admin/tables'],
     ['Inventory',      '/admin/inventory'],
     ['Reports',        '/admin/reports'],
 ];

@@ -641,6 +641,15 @@ label.check input {
     color: var(--error-text);
 }
 
+.badge-low {
+    background: #fdf0d5;
+    color: #8a5a0b;
+}
+
+.attention {
+    color: #8a5a0b;
+}
+
 /* Photos in the table */
 .thumb {
     width: 48px;
