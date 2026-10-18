@@ -112,13 +112,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'edit_table') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete_table') {
     $delete_id = (int) ($_POST['id'] ?? 0);
 
-    $stmt = $pdo->prepare('DELETE FROM restaurant_tables WHERE id = ?');
-    $stmt->execute([$delete_id]);
+    try {
+        $stmt = $pdo->prepare('DELETE FROM restaurant_tables WHERE id = ?');
+        $stmt->execute([$delete_id]);
 
-    if ($stmt->rowCount() > 0) {
-        set_flash('success', 'Table deleted.');
-    } else {
-        set_flash('error', 'That table could not be deleted.');
+        if ($stmt->rowCount() > 0) {
+            set_flash('success', 'Table deleted.');
+        } else {
+            set_flash('error', 'That table could not be deleted.');
+        }
+    } catch (PDOException $e) {
+        if ((int) $e->errorInfo[1] === 1451) {
+            set_flash('error', 'This table has orders, so it cannot be deleted.');
+        } else {
+            throw $e;
+        }
     }
     redirect($back);
 }

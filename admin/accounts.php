@@ -130,13 +130,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'edit') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete') {
     $delete_id = (int) ($_POST['id'] ?? 0);
 
-    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role != 'admin'");
-    $stmt->execute([$delete_id]);
+    try {
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role != 'admin'");
+        $stmt->execute([$delete_id]);
 
-    if ($stmt->rowCount() > 0) {
-        set_flash('success', 'Staff account deleted.');
-    } else {
-        set_flash('error', 'That account cannot be deleted.');
+        if ($stmt->rowCount() > 0) {
+            set_flash('success', 'Staff account deleted.');
+        } else {
+            set_flash('error', 'That account cannot be deleted.');
+        }
+    } catch (PDOException $e) {
+        if ((int) $e->errorInfo[1] === 1451) {
+            set_flash('error', 'This person has orders, so the account cannot be deleted. Set it to inactive instead.');
+        } else {
+            throw $e;
+        }
     }
     redirect($back);
 }
