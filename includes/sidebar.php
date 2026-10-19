@@ -1,14 +1,31 @@
 <?php
-$links = [
-    ['Dashboard',      '/admin/dashboard'],
-    ['Staff accounts', '/admin/accounts'],
-    ['Orders',         '/admin/orders'],
-    ['Menu items',     '/admin/menu'],
-    ['Tables',         '/admin/tables'],
-    ['Inventory',      '/admin/inventory'],
-    ['Reports',        '/admin/reports'],
+// Every role's menu in one place: [label, path]
+$menus = [
+    'admin' => [
+        ['Dashboard',      '/admin/dashboard'],
+        ['Staff accounts', '/admin/accounts'],
+        ['Orders',         '/admin/orders'],
+        ['Menu items',     '/admin/menu'],
+        ['Tables',         '/admin/tables'],
+        ['Inventory',      '/admin/inventory'],
+        ['Reports',        '/admin/reports'],
+    ],
+    'waiter' => [
+        ['Dashboard', '/staff/dashboard'],
+        ['Tables',    '/staff/tables'],
+        ['Orders',    '/staff/orders'],
+    ],
+    'kitchen' => [
+        ['Dashboard', '/staff/dashboard'],
+        ['Kitchen',   '/staff/kitchen'],
+    ],
+    'cashier' => [
+        ['Dashboard', '/staff/dashboard'],
+        ['Billing',   '/staff/billing'],
+    ],
 ];
 
+$links = $menus[current_user()['role']] ?? [];
 $current = $_SERVER['REQUEST_URI'];
 ?>
 <aside class="sidebar">
