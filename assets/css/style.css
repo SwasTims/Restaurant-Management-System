@@ -747,6 +747,271 @@ label.check input {
     font-size: 0.9rem;
 }
 
+/* Table cards (waiter screen) */
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.chip-row .btn-active {
+    background: var(--forest);
+    color: var(--butter);
+    border-color: var(--forest);
+}
+
+.chip-row .btn-active:hover {
+    background: var(--forest-dark);
+    color: var(--butter);
+}
+
+.table-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+}
+
+.table-card {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-left: 5px solid var(--cream-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.table-card.table-free {
+    border-left-color: var(--forest);
+}
+
+.table-card.table-occupied {
+    border-left-color: #b3402a;
+}
+
+.table-card.table-reserved {
+    border-left-color: var(--amber);
+}
+
+.table-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-card-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--forest);
+}
+
+.table-card-seats {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.table-orders {
+    list-style: none;
+    margin-top: 6px;
+    border-top: 1px dashed var(--cream-border);
+}
+
+.table-orders li {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--cream-border);
+}
+
+.table-orders li:last-child {
+    border-bottom: none;
+}
+
+.table-orders-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-orders-sub {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.table-card-action {
+    margin-top: 8px;
+    align-self: flex-start;
+}
+
+/* Order screen */
+.order-for {
+    font-size: 1.05rem;
+}
+
+.order-for-note {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.order-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.menu-search {
+    max-width: 360px;
+    margin-bottom: 16px;
+}
+
+.menu-group {
+    margin-bottom: 22px;
+}
+
+.menu-group-title {
+    color: var(--forest);
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.menu-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.menu-row.is-picked {
+    border-color: var(--forest);
+    background: #f4f9f1;
+}
+
+.menu-row[hidden],
+.menu-group[hidden] {
+    display: none;
+}
+
+.menu-row .thumb {
+    flex-shrink: 0;
+}
+
+.menu-row-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.menu-row-name {
+    font-weight: 600;
+}
+
+.menu-row-price {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.qty-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--cream-border);
+    border-radius: 8px;
+    background: var(--white);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--forest);
+}
+
+.qty-btn:hover {
+    background: var(--cream);
+}
+
+.qty-control input.qty-input {
+    width: 52px;
+    padding: 6px;
+    text-align: center;
+}
+
+.order-summary {
+    position: sticky;
+    top: 20px;
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.summary-empty {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.summary-list {
+    list-style: none;
+    margin: 8px 0;
+}
+
+.summary-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    font-size: 0.92rem;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--cream-border);
+    font-weight: 600;
+    color: var(--forest);
+}
+
+.order-summary .btn {
+    width: 100%;
+    margin-top: 14px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    background: var(--amber);
+}
+
+.table tbody tr.row-ready {
+    background: #f4f9f1;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.table td.actions .btn + .inline-form,
+.table td.actions .inline-form + .btn {
+    margin-left: 6px;
+}
+
+.table td.actions .inline-form .btn {
+    margin-left: 6px;
+}
+
 /* =========================================================
    9. Popups
    ========================================================= */
@@ -926,6 +1191,233 @@ label.check input {
     border-radius: 999px;
 }
 
+/* Kitchen board */
+.kitchen-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.kitchen-column {
+    background: var(--cream-dark);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 140px;
+}
+
+.kitchen-column-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--forest);
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.kitchen-count {
+    background: var(--forest);
+    color: var(--butter);
+    font-size: 0.78rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+
+.kitchen-empty {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 18px 0;
+}
+
+.ticket {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-left: 5px solid var(--forest);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.ticket-late {
+    border-left-color: var(--amber);
+    background: #fffaf0;
+}
+
+.ticket-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.ticket-table {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--forest);
+}
+
+.ticket-id {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.ticket-meta {
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+}
+
+.ticket-late .ticket-meta {
+    color: #8a5a0b;
+    font-weight: 600;
+}
+
+.ticket-lines {
+    list-style: none;
+    margin: 8px 0 12px;
+    border-top: 1px dashed var(--cream-border);
+    padding-top: 8px;
+}
+
+.ticket-lines li {
+    padding: 2px 0;
+}
+
+.ticket-qty {
+    display: inline-block;
+    min-width: 34px;
+    font-weight: 600;
+    color: var(--forest);
+}
+
+.ticket-button {
+    width: 100%;
+}
+
+.ticket-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+
+/* Billing and receipt */
+.bill-summary {
+    margin: 14px 0 4px;
+    border-top: 1px solid var(--cream-border);
+    padding-top: 10px;
+}
+
+.bill-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+}
+
+.bill-row-total {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--forest);
+    border-top: 1px solid var(--cream-border);
+    margin-top: 6px;
+    padding-top: 8px;
+}
+
+.receipt-page {
+    background: var(--cream-dark);
+    padding: 24px 12px;
+}
+
+.receipt-banner {
+    max-width: 380px;
+    margin: 0 auto 16px;
+}
+
+.receipt {
+    max-width: 380px;
+    margin: 0 auto;
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 10px;
+    padding: 24px;
+}
+
+.receipt h1 {
+    text-align: center;
+    font-size: 1.15rem;
+    color: var(--forest);
+}
+
+.receipt-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+}
+
+.receipt-meta {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 12px;
+}
+
+.receipt table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.receipt th,
+.receipt td {
+    padding: 5px 0;
+    text-align: left;
+    border-bottom: 1px dashed var(--cream-border);
+}
+
+.receipt .num,
+.receipt th.num {
+    text-align: right;
+}
+
+.receipt-thanks {
+    text-align: center;
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.receipt-actions {
+    max-width: 380px;
+    margin: 16px auto 0;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.receipt-actions .btn {
+    margin-top: 0;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .receipt-page {
+        background: #fff;
+        padding: 0;
+    }
+
+    .receipt {
+        border: none;
+        max-width: none;
+        padding: 0;
+    }
+}
 /* =========================================================
    11. Small screens
    ========================================================= */

@@ -4,13 +4,25 @@ require_once __DIR__ . '/../includes/auth.php';
 require_role(['waiter', 'kitchen', 'cashier']);
 
 $role = current_user()['role'];
-$my_id = (int) current_user()['id'];
+$user_id = (int) current_user()['id'];
 
-// Each card: [label, number, small text, link path]
+// Today: from midnight up to (not including) midnight tomorrow
+$today = new DateTime('today');
+$start = $today->format('Y-m-d') . ' 00:00:00';
+$end = (clone $today)->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
+
+// A short line under the greeting, per role
+$intro = [
+    'waiter'  => 'Pick a table to start a new order, or follow up on your open ones.',
+    'kitchen' => 'New orders appear here as soon as the waiters send them.',
+    'cashier' => 'Served orders wait here for payment.',
+];
+
+// Each card is [label, number, small text, link]
 $cards = [];
 
 if ($role === 'waiter') {
-    $free = (int) $pdo->query(
+    $free_tables = (int) $pdo->query(
         "SELECT COUNT(*) FROM restaurant_tables WHERE status = 'free'"
     )->fetchColumn();
 
@@ -18,38 +30,41 @@ if ($role === 'waiter') {
         "SELECT COUNT(*) FROM orders
          WHERE waiter_id = ? AND status NOT IN ('paid', 'cancelled')"
     );
-    $stmt->execute([$my_id]);
-    $mine = (int) $stmt->fetchColumn();
+    $stmt->execute([$user_id]);
+    $my_open = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE waiter_id = ? AND status = 'ready'");
+    $stmt->execute([$user_id]);
+    $ready_to_serve = (int) $stmt->fetchColumn();
 
     $cards = [
-        ['Free tables',    $free, 'ready for guests',  '/staff/tables'],
-        ['My open orders', $mine, 'not yet paid',      '/staff/orders'],
+        ['Free tables',    $free_tables,    'ready for guests',    '/staff/tables'],
+        ['My open orders', $my_open,        'not yet paid',        '/staff/orders'],
+        ['Ready to serve', $ready_to_serve, 'the kitchen is done', '/staff/orders?show=ready'],
     ];
 } elseif ($role === 'kitchen') {
-    $waiting = (int) $pdo->query(
-        "SELECT COUNT(*) FROM orders WHERE status = 'pending'"
-    )->fetchColumn();
-
-    $cooking = (int) $pdo->query(
-        "SELECT COUNT(*) FROM orders WHERE status = 'preparing'"
-    )->fetchColumn();
+    $pending = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'")->fetchColumn();
+    $preparing = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'preparing'")->fetchColumn();
+    $ready = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'ready'")->fetchColumn();
 
     $cards = [
-        ['Waiting to start', $waiting, 'new orders',      '/staff/kitchen'],
-        ['Being prepared',   $cooking, 'in the kitchen',  '/staff/kitchen'],
+        ['New orders', $pending,   'waiting to be started',  '/staff/kitchen'],
+        ['Preparing',  $preparing, 'on the stove',           '/staff/kitchen'],
+        ['Ready',      $ready,     'waiting for the waiter', '/staff/kitchen'],
     ];
 } else { // cashier
-    $to_bill = (int) $pdo->query(
-        "SELECT COUNT(*) FROM orders WHERE status = 'served'"
-    )->fetchColumn();
+    $waiting = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'served'")->fetchColumn();
 
-    $in_progress = (int) $pdo->query(
-        "SELECT COUNT(*) FROM orders WHERE status IN ('pending', 'preparing', 'ready')"
-    )->fetchColumn();
+        $stmt = $pdo->prepare(
+        "SELECT COUNT(*) FROM orders
+         WHERE status = 'paid' AND paid_at >= ? AND paid_at < ?"
+    );
+    $stmt->execute([$start, $end]);
+    $paid_today = (int) $stmt->fetchColumn();
 
     $cards = [
-        ['Waiting for payment', $to_bill,     'served, not yet paid', '/staff/billing'],
-        ['Still in the kitchen', $in_progress, 'bills coming soon',    '/staff/billing'],
+        ['Waiting for payment', $waiting,    'served, not yet paid', '/staff/billing'],
+        ['Paid today',          $paid_today, 'orders closed',        '/staff/billing'],
     ];
 }
 
@@ -57,7 +72,9 @@ $page_title = 'Dashboard';
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<p class="dash-welcome">Hello, <strong><?= e($user['name']) ?></strong>. Here is what is happening right now.</p>
+<p class="dash-welcome">
+    Hello, <strong><?= e($user['name']) ?></strong>. <?= e($intro[$role]) ?>
+</p>
 
 <div class="cards">
     <?php foreach ($cards as $card): ?>

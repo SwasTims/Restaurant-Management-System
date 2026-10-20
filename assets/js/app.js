@@ -145,3 +145,153 @@ if (restockDialog) {
         });
     });
 }
+
+// ---- Order screen: quantity buttons, live summary, menu search ----
+const orderForm = document.getElementById('orderForm');
+
+if (orderForm) {
+    const rows = Array.from(orderForm.querySelectorAll('.menu-row'));
+    const groups = Array.from(orderForm.querySelectorAll('.menu-group'));
+    const summaryList = document.getElementById('summaryList');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const summaryEmpty = document.getElementById('summaryEmpty');
+    const sendButton = document.getElementById('sendOrder');
+    const search = document.getElementById('menuSearch');
+
+    // Reads a quantity without changing what the person typed
+    function readQty(input) {
+        const n = parseInt(input.value, 10);
+        if (isNaN(n) || n < 0) {
+            return 0;
+        }
+        return Math.min(n, 99);
+    }
+
+    function updateSummary() {
+        summaryList.innerHTML = '';
+        let total = 0;
+        let count = 0;
+
+        rows.forEach(function (row) {
+            const qty = readQty(row.querySelector('.qty-input'));
+            row.classList.toggle('is-picked', qty > 0);
+
+            if (qty > 0) {
+                const amount = parseFloat(row.dataset.price) * qty;
+                total += amount;
+                count += qty;
+
+                const li = document.createElement('li');
+                const label = document.createElement('span');
+                const price = document.createElement('span');
+                label.textContent = qty + ' \u00d7 ' + row.dataset.name;
+                price.textContent = amount.toFixed(2);
+                li.append(label, price);
+                summaryList.appendChild(li);
+            }
+        });
+
+        summaryTotal.textContent = 'Rs. ' + total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        summaryEmpty.hidden = count > 0;
+        sendButton.disabled = count === 0;
+    }
+
+    // + and - buttons
+    orderForm.addEventListener('click', function (event) {
+        const button = event.target.closest('.qty-minus, .qty-plus');
+        if (!button) {
+            return;
+        }
+        const input = button.closest('.menu-row').querySelector('.qty-input');
+        const change = button.classList.contains('qty-plus') ? 1 : -1;
+        input.value = Math.max(0, Math.min(99, readQty(input) + change));
+        updateSummary();
+    });
+
+    // Typing a quantity
+    orderForm.addEventListener('input', function (event) {
+        if (event.target.classList.contains('qty-input')) {
+            updateSummary();
+        }
+    });
+
+    // When a quantity field is left, tidy up what was typed ("abc" becomes 0)
+    orderForm.addEventListener('change', function (event) {
+        if (event.target.classList.contains('qty-input')) {
+            event.target.value = readQty(event.target);
+            updateSummary();
+        }
+    });
+
+    // Enter must not send the order by accident
+    orderForm.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
+            event.preventDefault();
+        }
+    });
+
+    // Menu search: hide dishes that do not match (hidden dishes stay in the order)
+    search.addEventListener('input', function () {
+        const query = search.value.trim().toLowerCase();
+
+        rows.forEach(function (row) {
+            row.hidden = query !== '' && !row.dataset.name.toLowerCase().includes(query);
+        });
+        groups.forEach(function (group) {
+            group.hidden = !group.querySelector('.menu-row:not([hidden])');
+        });
+    });
+
+    updateSummary();
+}
+
+// ---- Cancel-order popup: show the order, remember its id ----
+const cancelDialog = document.getElementById('cancelDialog');
+
+if (cancelDialog) {
+    document.querySelectorAll('[data-cancel]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            cancelDialog.querySelector('[name="id"]').value = button.dataset.id;
+            cancelDialog.querySelector('#cancelName').textContent = button.dataset.name;
+            cancelDialog.showModal();
+        });
+    });
+}
+
+// ---- Bill popup: live preview of discount, VAT and total ----
+document.querySelectorAll('form[data-bill]').forEach(function (form) {
+    const subtotalCents = Math.round(parseFloat(form.dataset.subtotal) * 100);
+    const vatRate = parseFloat(form.dataset.vat);
+    const input = form.querySelector('[name="discount"]');
+
+    function money(cents) {
+        return (cents / 100).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function update() {
+        let pct = parseFloat(input.value);
+        if (isNaN(pct) || pct < 0) {
+            pct = 0;
+        }
+        if (pct > 100) {
+            pct = 100;
+        }
+
+        const discountCents = Math.round(subtotalCents * pct / 100);
+        const afterCents = subtotalCents - discountCents;
+        const vatCents = Math.round(afterCents * vatRate / 100);
+
+        form.querySelector('.bill-discount').textContent = money(discountCents);
+        form.querySelector('.bill-vat').textContent = money(vatCents);
+        form.querySelector('.bill-total').textContent = money(afterCents + vatCents);
+    }
+
+    input.addEventListener('input', update);
+    update();
+});
